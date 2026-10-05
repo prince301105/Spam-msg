@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SMS Spam Detection</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="page">
+
+        <!-- Header -->
+        <header class="header">
+
+            <div class="brand">
+                <div class="brand-icon">🛡</div>
+
+                <div>
+                    <h1>SMS Shield</h1>
+                    <p>Rule-Based NLP Spam Detection</p>
+                </div>
+            </div>
+
+            <div class="status">
+                <span class="status-dot"></span>
+                System Active
+            </div>
+
+        </header>
+
+
+        <!-- Main Content -->
+        <main class="main">
+
+            <!-- Introduction -->
+            <section class="hero">
+
+                <div>
+                    <span class="tag">NATURAL LANGUAGE PROCESSING</span>
+
+                    <h2>Detect suspicious SMS messages<br>
+                        <span>in seconds.</span>
+                    </h2>
+
+                    <p>
+                        Enter an SMS message below and our rule-based NLP
+                        system will analyze keywords, patterns and spam
+                        indicators.
+                    </p>
+                </div>
+
+            </section>
+
+
+            <!-- Input Card -->
+            <section class="card input-card">
+
+                <div class="card-heading">
+
+                    <div>
+                        <h3>Analyze Message</h3>
+                        <p>Enter the SMS you want to check.</p>
+                    </div>
+
+                    <div class="message-icon">✉</div>
+
+                </div>
+
+
+                <form method="POST">
+
+                    <div class="textarea-wrapper">
+
+                        <textarea
+                            id="message"
+                            name="message"
+                            maxlength="500"
+                            placeholder="Example: Congratulations! You won a free prize. Click here now!"
+                            required
+                            oninput="updateCounter()">{{ message }}</textarea>
+
+                        <span id="counter">0 / 500</span>
+
+                    </div>
+
+
+                    <button type="submit" class="analyze-btn">
+
+                        <span>Analyze SMS</span>
+
+                        <span class="arrow">→</span>
+
+                    </button>
+
+                </form>
+
+            </section>
+
+
+            {% if result %}
+
+            <!-- Result Section -->
+            <section class="result-section">
+
+                <div class="section-title">
+                    <div>
+                        <h3>Analysis Result</h3>
+                        <p>Results generated using your NLP rules.</p>
+                    </div>
+                </div>
+
+
+                <!-- Result Cards -->
+                <div class="result-grid">
+
+                    <!-- Classification -->
+                    <div class="result-card">
+
+                        <div class="result-card-top">
+                            <span>CLASSIFICATION</span>
+                            <span class="card-symbol">●</span>
+                        </div>
+
+                        {% if result == "SPAM" %}
+
+                        <div class="classification spam-result">
+                            SPAM
+                        </div>
+
+                        <p class="description">
+                            This message contains suspicious indicators.
+                        </p>
+
+                        {% else %}
+
+                        <div class="classification safe-result">
+                            NOT SPAM
+                        </div>
+
+                        <p class="description">
+                            No significant spam indicators were detected.
+                        </p>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- Spam Score -->
+                    <div class="result-card">
+
+                        <div class="result-card-top">
+                            <span>SPAM SCORE</span>
+                            <span class="card-symbol">◆</span>
+                        </div>
+
+                        <div class="score-number">
+                            {{ score }}
+                        </div>
+
+                        <p class="description">
+                            Higher scores indicate more suspicious indicators.
+                        </p>
+
+                    </div>
+
+
+                    <!-- Keywords -->
+                    <div class="result-card">
+
+                        <div class="result-card-top">
+                            <span>SPAM KEYWORDS</span>
+                            <span class="card-symbol">#</span>
+                        </div>
+
+                        <div class="score-number">
+                            {{ keywords|length }}
+                        </div>
+
+                        <p class="description">
+                            Keyword indicators detected.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Detailed Analysis -->
+                <div class="details-grid">
+
+
+                    <!-- Processed Tokens -->
+                    <div class="detail-card">
+
+                        <div class="detail-header">
+
+                            <div class="detail-icon">Aa</div>
+
+                            <div>
+                                <h3>Processed Tokens</h3>
+                                <p>Tokens after NLP preprocessing</p>
+                            </div>
+
+                        </div>
+
+
+                        <div class="token-container">
+
+                            {% if tokens %}
+
+                                {% for token in tokens %}
+
+                                    <span class="token">
+                                        {{ token }}
+                                    </span>
+
+                                {% endfor %}
+
+                            {% else %}
+
+                                <span class="empty">
+                                    None
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Detected Keywords -->
+                    <div class="detail-card">
+
+                        <div class="detail-header">
+
+                            <div class="detail-icon warning-icon">!</div>
+
+                            <div>
+                                <h3>Detected Keywords</h3>
+                                <p>Spam-related words found</p>
+                            </div>
+
+                        </div>
+
+
+                        <div class="token-container">
+
+                            {% if keywords %}
+
+                                {% for keyword in keywords %}
+
+                                    <span class="keyword">
+                                        {{ keyword }}
+                                    </span>
+
+                                {% endfor %}
+
+                            {% else %}
+
+                                <span class="empty">
+                                    No spam keywords detected
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Detected Patterns -->
+                    <div class="detail-card patterns-card">
+
+                        <div class="detail-header">
+
+                            <div class="detail-icon pattern-icon">⌁</div>
+
+                            <div>
+                                <h3>Detected Patterns</h3>
+                                <p>Suspicious message patterns</p>
+                            </div>
+
+                        </div>
+
+
+                        {% if patterns %}
+
+                        <div class="pattern-list">
+
+                            {% for pattern in patterns %}
+
+                            <div class="pattern">
+
+                                <span class="pattern-dot"></span>
+
+                                {{ pattern }}
+
+                            </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                        {% else %}
+
+                        <div class="empty-box">
+                            No suspicious patterns detected
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            {% endif %}
+
+
+            <!-- Footer Information -->
+            <section class="info">
+
+                <div class="info-item">
+                    <strong>NLP Processing</strong>
+                    <span>Text preprocessing & tokenization</span>
+                </div>
+
+                <div class="info-item">
+                    <strong>Rule-Based Detection</strong>
+                    <span>Keywords & pattern matching</span>
+                </div>
+
+                <div class="info-item">
+                    <strong>No Machine Learning</strong>
+                    <span>Predefined linguistic rules</span>
+                </div>
+
+            </section>
+
+        </main>
+
+
+        <footer>
+            <p>
+                SMS Shield • Natural Language Processing Project
+            </p>
+        </footer>
+
+    </div>
+
+
+    <script>
+
+        function updateCounter() {
+
+            const message = document.getElementById("message");
+
+            const counter = document.getElementById("counter");
+
+            counter.textContent =
+                message.value.length + " / 500";
+
+        }
+
+        window.onload = updateCounter;
+
+    </script>
+
+</body>
+
+</html>
